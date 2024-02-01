@@ -16,9 +16,11 @@ class BaseStep extends StatelessWidget {
     required this.step,
     required this.isActive,
     required this.isFinished,
+    required this.totalSteps,
     required this.isUnreached,
     required this.isAlreadyReached,
     required this.onStepSelected,
+    required this.currentIndex,
     required this.showTitle,
     required this.radius,
     required this.activeStepBackgroundColor,
@@ -82,6 +84,8 @@ class BaseStep extends StatelessWidget {
   final bool enabled;
   final bool showScrollBar;
   final Axis direction;
+  final int currentIndex;
+  final int totalSteps;
 
   @override
   Widget build(BuildContext context) {
@@ -111,17 +115,24 @@ class BaseStep extends StatelessWidget {
                 canRequestFocus: false,
                 radius: radius,
                 child: Container(
-                  width: radius * 2,
+                  // width: radius * 1.5,
+                  // height: radius * 1.5,
+                  width: radius * 1,
                   height: radius * 2,
                   decoration: BoxDecoration(
-                      shape: stepShape == StepShape.circle
-                          ? BoxShape.circle
-                          : BoxShape.rectangle,
-                      borderRadius: stepShape != StepShape.circle
-                          ? BorderRadius.circular(stepRadius ?? 0)
-                          : null,
-                      color: _handleColor(
-                          context, isFinished, isActive, isAlreadyReached)),
+                    shape: stepShape == StepShape.circle
+                        ? BoxShape.circle
+                        : BoxShape.rectangle,
+                    borderRadius: stepShape != StepShape.circle
+                        ? BorderRadius.circular(stepRadius ?? 0)
+                        : null,
+                    color: _handleColor(
+                      context,
+                      isFinished,
+                      isActive,
+                      isAlreadyReached,
+                    ),
+                  ),
                   alignment: Alignment.center,
                   child: showStepBorder
                       ? EasyBorder(
@@ -157,7 +168,7 @@ class BaseStep extends StatelessWidget {
   Color _handleColor(BuildContext context, bool isFinished, bool isActive,
       bool isAlreadyReached) {
     if (isActive) {
-      return activeStepBackgroundColor ?? Colors.transparent;
+      return activeStepBackgroundColor ?? Theme.of(context).colorScheme.primary;
     } else {
       if (isFinished) {
         return finishedBackgroundColor ?? Theme.of(context).colorScheme.primary;
@@ -172,7 +183,7 @@ class BaseStep extends StatelessWidget {
   Color _handleBorderColor(BuildContext context, bool isFinished, bool isActive,
       bool isAlreadyReached) {
     if (isActive) {
-      return activeStepBorderColor ?? Theme.of(context).colorScheme.primary;
+      return activeStepBorderColor ?? Colors.transparent;
     } else {
       if (isFinished) {
         return finishedBorderColor ?? Colors.transparent;
@@ -217,9 +228,9 @@ class BaseStep extends StatelessWidget {
   Widget _buildStepTitle(BuildContext context) {
     return Positioned.directional(
       textDirection: textDirection,
-      top: step.topTitle ? -(radius * 2.35) : (radius * 2.35),
+      top: step.topTitle ? -(radius * 2.35) : (radius * 1.8),
       child: SizedBox(
-        width: (radius * 2) +
+        width: (radius * 1.2) +
             (padding ?? 0) +
             (direction == Axis.horizontal ? lineLength : 0),
         child: step.customTitle ??
@@ -242,22 +253,45 @@ class BaseStep extends StatelessWidget {
 
   SizedBox _buildIcon(BuildContext context) {
     return SizedBox(
-      width: radius * 2,
-      height: radius * 2,
-      child: Center(
-        child: step.customStep ??
-            Icon(
-              isActive && step.activeIcon != null
-                  ? step.activeIcon!.icon
-                  : isFinished && step.finishIcon != null
-                      ? step.finishIcon!.icon
-                      : step.icon!.icon,
-              size: radius * 0.9,
-              color: _handleIconColor(
-                  context, isFinished, isActive, isAlreadyReached),
-            ),
-      ),
-    );
+        child: Center(
+            widthFactor: 2.5,
+            child:
+                //  step.customStep ??
+                (currentIndex > (currentIndex - 1)) && !isActive && !isUnreached
+                    ? const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Text(
+                          "${currentIndex + 1}",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(
+                                  color: isUnreached
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.white),
+                        ),
+                      )));
+    // return SizedBox(
+    //   width: radius * 2,
+    //   height: radius * 2,
+    //   child: Center(
+    //     child: step.customStep ??
+    //         Icon(
+    //           isActive && step.activeIcon != null
+    //               ? step.activeIcon!.icon
+    //               : isFinished && step.finishIcon != null
+    //                   ? step.finishIcon!.icon
+    //                   : step.icon!.icon,
+    //           size: radius * 0.9,
+    //           color: _handleIconColor(
+    //               context, isFinished, isActive, isAlreadyReached),
+    //         ),
+    //   ),
+    // );
   }
 
   Center _buildLoadingIcon() {

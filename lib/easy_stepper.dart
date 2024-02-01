@@ -254,66 +254,71 @@ class _EasyStepperState extends State<EasyStepper> {
       WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
     }
 
-    return ScrollConfiguration(
-      behavior: CustomScrollBehavior(),
-      child: Align(
-        alignment: widget.alignment,
-        child: NotificationListener<OverscrollIndicatorNotification>(
-          onNotification: (OverscrollIndicatorNotification overscroll) {
-            overscroll.disallowIndicator();
-            return false;
-          },
-          child: widget.disableScroll
-              ? widget.direction == Axis.horizontal
-                  ? FittedBox(
-                      fit: widget.fitWidth ? BoxFit.fitWidth : BoxFit.none,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+    return SizedBox(
+      width: double.infinity,
+      child: ScrollConfiguration(
+        behavior: CustomScrollBehavior(),
+        child: Align(
+          alignment: widget.alignment,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification overscroll) {
+              overscroll.disallowIndicator();
+              return false;
+            },
+            child: widget.disableScroll
+                ? widget.direction == Axis.horizontal
+                    ? FittedBox(
+                        fit: widget.fitWidth ? BoxFit.fitWidth : BoxFit.none,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: _buildEasySteps(),
+                        ),
+                      )
+                    : Column(
                         children: _buildEasySteps(),
-                      ),
-                    )
-                  : Column(
-                      children: _buildEasySteps(),
-                    )
-              : ((kIsWeb ||
-                          Platform.isWindows ||
-                          Platform.isMacOS ||
-                          Platform.isLinux) &&
-                      widget.showScrollbar)
-                  ? Scrollbar(
-                      controller: _scrollController,
-                      child: SingleChildScrollView(
+                      )
+                : ((kIsWeb ||
+                            Platform.isWindows ||
+                            Platform.isMacOS ||
+                            Platform.isLinux) &&
+                        widget.showScrollbar)
+                    ? Scrollbar(
+                        controller: _scrollController,
+                        child: SingleChildScrollView(
+                          scrollDirection: widget.direction,
+                          physics: const ClampingScrollPhysics(),
+                          controller: _scrollController,
+                          padding: widget.padding,
+                          child: widget.direction == Axis.horizontal
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: _buildEasySteps(),
+                                )
+                              : Column(
+                                  children: _buildEasySteps(),
+                                ),
+                        ),
+                      )
+                    : SingleChildScrollView(
                         scrollDirection: widget.direction,
                         physics: const ClampingScrollPhysics(),
                         controller: _scrollController,
-                        padding: widget.padding,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: widget.direction == Axis.horizontal
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: _buildEasySteps(),
+                            ? SizedBox(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: _buildEasySteps(),
+                                ),
                               )
                             : Column(
                                 children: _buildEasySteps(),
                               ),
                       ),
-                    )
-                  : SingleChildScrollView(
-                      scrollDirection: widget.direction,
-                      physics: const ClampingScrollPhysics(),
-                      controller: _scrollController,
-                      padding: widget.padding,
-                      child: widget.direction == Axis.horizontal
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: _buildEasySteps(),
-                            )
-                          : Column(
-                              children: _buildEasySteps(),
-                            ),
-                    ),
+          ),
         ),
       ),
     );
@@ -347,6 +352,8 @@ class _EasyStepperState extends State<EasyStepper> {
     final step = widget.steps[index];
     return BaseStep(
       step: step,
+      totalSteps: widget.steps.length,
+      currentIndex: index,
       radius: widget.stepRadius,
       showScrollBar: widget.showScrollbar,
       showTitle: widget.showTitle,

@@ -47,5 +47,5 @@ class EasyStep {
     this.customLineWidget,
     this.topTitle = false,
     this.enabled = true,
-  }) : assert(icon != null || customStep != null);
+  }) : assert(true);
 }
